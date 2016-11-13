@@ -2,6 +2,7 @@ import bge
 controller = bge.logic.getCurrentController()
 move = controller.actuators["move"]
 
+# get sensor data
 press_w = controller.sensors["w"]
 press_a = controller.sensors["a"]
 press_s = controller.sensors["s"]
@@ -16,6 +17,9 @@ def sign(x):
         return -1
     else:
         return 0
+
+
+############### x, y motion ################
 
 v_x = move.dLoc[0]
 v_y = move.dLoc[1]
@@ -47,9 +51,15 @@ if(abs(v_x) > v_max):
     v_x = v_max*sign(v_x)
 if(abs(v_y) > v_max):
     v_y = v_max*sign(v_y)
-    
-#print(v_x, v_y)
-#print(-True)
-    
-move.dLoc = [v_x, v_y, 0.0]
+
+
+
+############# z motion ###############
+
+v_speed = 0.7
+
+v_z = v_speed * (wheel_down.positive - wheel_up.positive)
+
+
+move.dLoc = [v_x, v_y, v_z]
 controller.activate(move)
