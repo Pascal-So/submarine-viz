@@ -29,13 +29,13 @@ v_x = move.dLoc[0]
 v_y = move.dLoc[1]
 
 # acceleration factor of the camera
-acc = 0.013
+acc = 0.002
 # max velocity of the camera (per axis)
 v_max = 0.1
 # dampening factor for the camera motion
-damp = 0.85
+damp = 0.95
 # stop the velocity if it is smaller than this value
-stop_limit = 0.008
+stop_limit = 0.0005
 
 # multiply by the height so that the camera
 # moves faster when it's further up
