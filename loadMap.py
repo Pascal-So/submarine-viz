@@ -2,11 +2,6 @@ import bge
 import png
 import itertools
 
-#controller = bge.logic.getCurrentController()
-#add_land = controller.actuators["add_land"]
-#add_end = controller.actuators["add_end"]
-#add_start = controller.actuators["add_start"]
-
 terrain_types = {}
 terrain_types[0] = "start"
 terrain_types[1] = "end"
