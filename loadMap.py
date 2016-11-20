@@ -100,4 +100,4 @@ def load_map(map_name):
     
     #print(list(pixels))
     
-load_map("submarine/rt/maps/map10.png")
+#load_map("submarine/rt/maps/map10.png")
