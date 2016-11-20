@@ -13,6 +13,7 @@ terrain_types[1] = "end"
 terrain_types[2] = "water"
 terrain_types[3] = "land"
 
+scene = bge.logic.getCurrentScene()
 
 def grouper(iterable, n, fillvalue=None):
     """Collect data into fixed-length chunks or blocks
@@ -22,6 +23,13 @@ def grouper(iterable, n, fillvalue=None):
     """
     args = [iter(iterable)] * n
     return itertools.zip_longest(*args, fillvalue=fillvalue)
+
+
+def place_camera( x, y ):
+    cam = scene.active_camera
+    z = cam.worldPosition[2]
+    
+    cam.worldPosition = (x, y, z)
 
 
 def create_map(width, height, pixels):
@@ -34,7 +42,7 @@ def create_map(width, height, pixels):
     """
     
 
-    scene = bge.logic.getCurrentScene()
+
     
     def index_to_xy(i, width, height):
         """ Takes 0 based index going line wise from top
@@ -87,6 +95,8 @@ def load_map(map_name):
     pixels = map(colorToTerrain, grouper(pixels, nr_channels, 0))
     
     create_map(image_width, image_height, pixels)
+    
+    place_camera(image_width/2, image_height/2)
     
     #print(list(pixels))
     
