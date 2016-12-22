@@ -10,6 +10,10 @@ terrain_types[3] = "land"
 
 scene = bge.logic.getCurrentScene()
 
+cont = bge.logic.getCurrentController()
+actuator_quit = cont.actuators["quit"]
+ob = cont.owner
+
 def grouper(iterable, n, fillvalue=None):
     """Collect data into fixed-length chunks or blocks
     
@@ -90,6 +94,9 @@ def load_map(map_name):
     pixels = map(colorToTerrain, grouper(pixels, nr_channels, 0))
     
     create_map(image_width, image_height, pixels)
+    
+    ob["map_width"] = image_width
+    ob["map_height"] = image_height
     
     place_camera(image_width/2, image_height/2)
     
