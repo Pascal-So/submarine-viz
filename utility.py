@@ -1,4 +1,4 @@
 # some utility functions
 
-log_to_world_coords(x, y, width, height):
-    pass
+def log_to_world_coords(x, y, width, height):
+    return (x, height-y)

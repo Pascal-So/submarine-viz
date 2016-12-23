@@ -67,7 +67,10 @@ def place_vessel(type, x, y):
     return vessel
 
 
-# main stuff.
+
+
+
+# main stuff. ------------------------------------------------------
 
 if not read_header_line(log_lines[2]):
     exit()
@@ -82,23 +85,32 @@ ob["pointer"] += ob["ship_count"]
 submarine_lines = log_lines[ob["pointer"]:ob["pointer"] + ob["submarine_count"]]
 ob["pointer"] += ob["submarine_count"]
 
-ships = []
+# `ships` and `submarines` are dicts from (x,y) tuples to the game object
+
+ships = {}
 
 for line in ship_lines:
     fields = line.split()
-    ships.append(place_vessel("ship", int(fields[1]), int(fields[2])))
+    x = int(fields[1])
+    y = int(fields[2])
+    ships[(x,y)] = place_vessel("ship", x, ob["map_height"]-1-y)
 
 
-submarines = []
+submarines = {}
 
 for line in submarine_lines:
     fields = line.split()
-    submarines.append(place_vessel("submarine", int(fields[1]), int(fields[2])))
+    x = int(fields[1])
+    y = int(fields[2])
+    submarines[(x,y)] = place_vessel("submarine", x, ob["map_height"]-1-y)
+    submarines.append(place_vessel("submarine", int(fields[1]), ob["map_height"] - 1 -int(fields[2])))
 
+# submarines and ships have been added to their start positions, start main loop now. 
 
+# pass the relevant information to the object so it can be used by "running.py"
+ob["log_lines"] = log_lines
+ob["ships"] = ships
+ob["submarines"] = submarines
 
-#map_name="submarine/rt/maps/map10.png"
-
-#loadMap.load_map(map_name)
-
-
+# this line effectively starts the "running.py" script
+ob["frame_nr"] = 0
