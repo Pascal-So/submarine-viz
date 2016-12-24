@@ -85,32 +85,53 @@ ob["pointer"] += ob["ship_count"]
 submarine_lines = log_lines[ob["pointer"]:ob["pointer"] + ob["submarine_count"]]
 ob["pointer"] += ob["submarine_count"]
 
-# `ships` and `submarines` are dicts from (x,y) tuples to the game object
 
-ships = {}
+# grumble grumble..
+# Blender gameengine can't handle storing game object
+# references in dicts, therefore I have to use arrays
+# and search for the correct object which is gonna make
+# it a bit slower but hey, we're not gonna have like
+# thousands of entities at a time, right? right??
+
+# `ships` and `submarines` are arrays of tuples
+# (game object, (x,y), last rotation)
+
+ships = []
 
 for line in ship_lines:
     fields = line.split()
     x = int(fields[1])
     y = int(fields[2])
-    ships[(x,y)] = place_vessel("ship", x, ob["map_height"]-1-y)
+    ship = place_vessel("ship", x, ob["map_height"]-1-y)
+    tpl = (ship, (x,y), 0.0)
+    ships.append(tpl)
 
 
-submarines = {}
+submarines = []
 
 for line in submarine_lines:
     fields = line.split()
     x = int(fields[1])
     y = int(fields[2])
-    submarines[(x,y)] = place_vessel("submarine", x, ob["map_height"]-1-y)
-    submarines.append(place_vessel("submarine", int(fields[1]), ob["map_height"] - 1 -int(fields[2])))
+    submarine = place_vessel("submarine", x, ob["map_height"]-1-y)
+    tpl = (submarine, (x,y), 0.0)
+    submarines.append(tpl)
 
-# submarines and ships have been added to their start positions, start main loop now. 
 
-# pass the relevant information to the object so it can be used by "running.py"
+# submarines and ships have been added to their start
+# positions, start main loop now. 
+
+# pass the relevant information to the object so it can
+# be used by "running.py"
 ob["log_lines"] = log_lines
 ob["ships"] = ships
 ob["submarines"] = submarines
+
+
+
+# phases: turing ships, moving ships, turning subs, moving
+# subs, etc..
+ob["moving_phase"] = False
 
 # this line effectively starts the "running.py" script
 ob["frame_nr"] = 0
