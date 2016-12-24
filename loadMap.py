@@ -98,7 +98,7 @@ def load_map(map_name):
     ob["map_width"] = image_width
     ob["map_height"] = image_height
     
-    place_camera(image_width/2, image_height/2)
+    place_camera(image_width/2, 0) #image_height/2)
     
     #print(list(pixels))
     

@@ -94,7 +94,9 @@ ob["pointer"] += ob["submarine_count"]
 # thousands of entities at a time, right? right??
 
 # `ships` and `submarines` are arrays of tuples
-# (game object, (x,y), last rotation)
+# (game object, (x,y), last rotation).
+# the `(x,y)` tuple does not update until the move is
+# complete.
 
 ships = []
 
@@ -129,9 +131,10 @@ ob["submarines"] = submarines
 
 
 
-# phases: turing ships, moving ships, turning subs, moving
-# subs, etc..
-ob["moving_phase"] = False
+# phases: turing, moving
+ob["turning_phase"] = True
+ob["ship_turn"] = True
 
-# this line effectively starts the "running.py" script
 ob["frame_nr"] = 0
+
+ob["game_running"] = True
