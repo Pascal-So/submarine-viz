@@ -3,10 +3,11 @@ import math
 
 c = bge.logic.getCurrentController()
 ob = c.owner
+scene = bge.logic.getCurrentScene()
 
 
-turn_phase_length = 10
-move_phase_length = 15
+turn_phase_length = 3
+move_phase_length = 10
 
 
 
@@ -137,27 +138,37 @@ def lerp_pos(p1, p2, frac):
 def move_object_to(obj, x, y):
     obj.worldPosition = (x, ob["map_height"] -1 -y, 0.0)
 
+
+def spawn_bullet(pos, rot):
+    """ returns the bullet object once it's been added to the scene
+    """
+    blt = scene.addObject("bullet", "gameLogic")
+    blt.worldPosition = (*pos, 0.0)
+    set_object_z_rotation(blt, rot)
+    return blt
+
+
+def setup():
+    # these functions set global variables instead
+    # of returning the results because we need to
+    # keep the information accross multiple calls of
+    # the scripts which makes this a bit more 
+    # difficult.
+    get_relevant_lines()
+    extract_actions()
+    #print(ob["movements"], "move")
+    ob["target_directions"] = list(map(lambda x : (x[0], compute_angles(x)), ob["movements"]))
+    # to the submarines it doesn't matter whether they're aligning to shoot or to move.
+    ob["target_directions"].extend(list(map(lambda x : (x[0], compute_angles(x)), ob["shots"])))
+
+
 def tick():
     time_in_phase = ob["frame_nr"] % total_phase_length
     
-    #print(time_in_phase, ob["turning_phase"])
-    
     if time_in_phase == 0:
         # first frame in the new player's turn
+        setup()
         
-        # these functions set global variables instead
-        # of returning the results because we need to
-        # keep the information accross multiple calls of
-        # the scripts which makes this a bit more 
-        # difficult.
-        get_relevant_lines()
-        extract_actions()
-        #print(ob["movements"], "move")
-        ob["target_directions"] = list(map(lambda x : (x[0], compute_angles(x)), ob["movements"]))
-        # to the submarines it doesn't matter whether they're aligning to shoot or to move.
-        ob["target_directions"].extend(list(map(lambda x : (x[0], compute_angles(x)), ob["shots"])))
-    
-    #list(map(lambda x: set_object_z_rotation(x[0], ob["frame_nr"]), ob["ships"]))
     
     vessels = ob["ships"] if ob["ship_turn"] else ob["submarines"]
     
@@ -187,13 +198,45 @@ def tick():
             move_obj_index = find_index(vessels, pos)
             move_obj, start, last_dir = vessels[move_obj_index]
                     
-            x,y = lerp_pos(start, dest, fraction_in_move_phase)
-            move_object_to(move_obj, x, y)
+            current_pos = lerp_pos(start, dest, fraction_in_move_phase)
+            move_object_to(move_obj, *current_pos)
             
             if time_in_phase == total_phase_length -1:
                 # update last pos in vessels array
                 vessels[move_obj_index] = (move_obj, dest, last_dir)
         
+    
+    # shoot some things!!
+    # turning to align for the shots will take exactly the same time as
+    # turning to move, shooting will be twice as fast as moving. I know, this
+    # is unrealistic, because the shot speed will depend on the distance, but since
+    # the distances won't vary by a lot (only within shoot radius), this shouldn't
+    # matter too much.
+    # bullets are stored in `ob["bullets"]`, format is `(bullet_object, (start, end))`
+    shoot_phase_length = move_phase_length // 2
+    time_in_shooting_phase = time_in_phase - turn_phase_length
+    is_shooting_phase = time_in_shooting_phase < shoot_phase_length and time_in_shooting_phase >= 0
+    if is_shooting_phase:
+        if time_in_shooting_phase == 0:
+            # spawn bullets
+            bullets = []
+            for start, end in ob["shots"]:
+                dir = compute_angles((start, end))
+                blt = spawn_bullet(start, dir)
+                bullets.append((blt, (start,end)))
+            ob["bullets"] = bullets
+        
+        fraction_in_shooting_phase = (time_in_phase - turn_phase_length) / (shoot_phase_length - 1)
+        
+        for blt, path in ob["bullets"]:
+            current_pos = lerp_pos(*path, fraction_in_shooting_phase)
+            move_object_to(blt, *current_pos)
+        
+        if time_in_shooting_phase == shoot_phase_length - 1:
+            # despawn bullets
+            for blt, _ in ob["bullets"]:
+                blt.endObject()
+    
     
     if time_in_phase == turn_phase_length-1:
         # reached end of turn phase, switch to move phase
