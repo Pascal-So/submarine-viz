@@ -1,7 +1,6 @@
 import bge
 import os
 import loadMap
-import utility
 
 # parsing of the log file happens in here.
 # start blender from the console in the git project roots in order for this to work
