@@ -6,9 +6,11 @@ ob = c.owner
 scene = bge.logic.getCurrentScene()
 
 
-turn_phase_length = 8
-move_phase_length = 10
+turn_phase_length = 4
+move_phase_length = 8
 
+
+# ^^^^^^^^^^^^ adjust speed settings here ^^^^^^^^^^^^^^^^^
 
 
 total_phase_length = turn_phase_length + move_phase_length

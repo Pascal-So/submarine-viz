@@ -8,7 +8,9 @@ import loadMap
 # if the game can't be started, check if the path_to_logfile is correct and if the
 # logfile is valid. The blender game will quit on incorrect input.
 
-path_to_logfile = "logs/game1.txt"
+path_to_logfile = "logs/game5.txt"
+
+# ^^^^^^^^^^   set path to log file here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 cont = bge.logic.getCurrentController()
