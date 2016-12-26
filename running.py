@@ -6,20 +6,28 @@ ob = c.owner
 scene = bge.logic.getCurrentScene()
 
 
-turn_phase_length = 3
+turn_phase_length = 8
 move_phase_length = 10
 
 
 
 total_phase_length = turn_phase_length + move_phase_length
 
+def set_object_rotation(rOb, degs, axis):
+    xyz = rOb.localOrientation.to_euler()
+    xyz[axis] = math.radians(degs)
+    rOb.localOrientation = xyz.to_matrix() 
+
 def set_object_z_rotation(rOb, degs):
     """ rotation 0 means pointing in positive y direction
     rotation is counter-clockwise.
     """
-    xyz = rOb.localOrientation.to_euler()
-    xyz[2] = math.radians(degs)
-    rOb.localOrientation = xyz.to_matrix() 
+    set_object_rotation(rOb, degs, 2) 
+    
+def set_object_y_rotation(rOb, degs):
+    """ rotation 0 is upright
+    """
+    set_object_rotation(rOb, degs, 1) 
 
 
 def find_index(vessel_array, needle):
@@ -197,7 +205,7 @@ def tick():
         for pos, dest in ob["movements"]:
             move_obj_index = find_index(vessels, pos)
             move_obj, start, last_dir = vessels[move_obj_index]
-                    
+            
             current_pos = lerp_pos(start, dest, fraction_in_move_phase)
             move_object_to(move_obj, *current_pos)
             
@@ -226,7 +234,7 @@ def tick():
                 bullets.append((blt, (start,end)))
             ob["bullets"] = bullets
         
-        fraction_in_shooting_phase = (time_in_phase - turn_phase_length) / (shoot_phase_length - 1)
+        fraction_in_shooting_phase = time_in_shooting_phase  / (shoot_phase_length - 1)
         
         for blt, path in ob["bullets"]:
             current_pos = lerp_pos(*path, fraction_in_shooting_phase)
@@ -236,6 +244,24 @@ def tick():
             # despawn bullets
             for blt, _ in ob["bullets"]:
                 blt.endObject()
+    
+    
+    # kill some things!!
+    # dying ships turn around their local y axis
+    dying_phase_length = move_phase_length - shoot_phase_length
+    time_in_dying_phase = time_in_phase - turn_phase_length - shoot_phase_length
+    is_dying_phase = time_in_dying_phase >= 0
+    if is_dying_phase:
+        
+        fraction_in_dying_phase = time_in_dying_phase / (dying_phase_length - 1)
+        
+        for pos in ob["deaths"]:
+            dying_ship_index = find_index(ob["ships"], pos)
+            dying_ship, _, _ = ob["ships"][dying_ship_index]
+            
+            current_y_rotation = lerp(0, 180, fraction_in_dying_phase)
+            
+            set_object_y_rotation(dying_ship, current_y_rotation)
     
     
     if time_in_phase == turn_phase_length-1:
