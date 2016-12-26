@@ -10,6 +10,10 @@ Then adjust the variable `path_to_logfile` in `setup.py` and set the variables t
 
 The animation can be started by moving the cursor over the 3d view and pressing `p`, or by pressing `Start` in the section `Standalone Player` in the `properties` editor to start the animation in a new window.
 
+## Camera motion
+
+Move the camera with the `wsad` keys, change the height by scrolling, look around by moving the mouse.
+
 -
 
 credit to: [martinsh for the ocean water](https://blenderartists.org/forum/showthread.php?242940-unlimited-planar-reflections-amp-refraction-update)
