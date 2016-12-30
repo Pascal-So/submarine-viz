@@ -1,4 +1,5 @@
 import bge
+import os
 controller = bge.logic.getCurrentController()
 move = controller.actuators["move"]
 cam = controller.owner
@@ -6,6 +7,9 @@ cam = controller.owner
 turn_phase_length = 4
 move_phase_length = 8
 
+export_path = "export"
+export_prefix = "export"
+export = False
 
 # ^^^^^^^^^^^^ adjust speed settings here ^^^^^^^^^^^^^^^^^
 total_phase_length = turn_phase_length + move_phase_length
@@ -128,3 +132,7 @@ controller.activate(move)
 
 if space.positive:
     print(" ".join(map(str, curval)))
+
+if export:
+    filename = os.path.join(export_path, export_prefix + str(cam["frame_nr_exact"]).zfill(8) + ".png")
+    bge.render.makeScreenshot(os.path.abspath(filename))
