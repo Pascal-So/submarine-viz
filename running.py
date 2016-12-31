@@ -7,14 +7,9 @@ ob = c.owner
 scene = bge.logic.getCurrentScene()
 cam = scene.objects['Camera']
 
-
-turn_phase_length = 4
-move_phase_length = 8
-
-jump_to_frame = 0
-
-# ^^^^^^^^^^^^ adjust speed settings here ^^^^^^^^^^^^^^^^^
-
+turn_phase_length = ob["turn_phase_length"]
+move_phase_length = ob["move_phase_length"]
+jump_to_frame = ob["jump_to_frame"]
 
 total_phase_length = turn_phase_length + move_phase_length
 
@@ -35,14 +30,16 @@ def set_object_y_rotation(rOb, degs):
     set_object_rotation(rOb, degs, 1)
 
 
-def find_index(vessel_array, needle):
+def find_index(vessel_array, needle, ommit=None):
     """ Find the index of the vessel by the (x,y) value.
 
     Structure of `vessel_array` is assumed to be (game_object,
     (x,y), last_rotation).
     """
+    if ommit is None:
+        ommit = []
     for i, (v, pos, r) in enumerate(vessel_array):
-        if pos == needle:
+        if pos == needle and i not in ommit:
             return i # object found
     return -1 # object not found
 
@@ -184,6 +181,7 @@ def tick():
         cam["frame_nr"] += 1
 
     vessels = ob["ships"] if ob["ship_turn"] else ob["submarines"]
+    dead_vessels = ob["dead_ships"] if ob["ship_turn"] else []
 
     # turn all the things!!
     if ob["turning_phase"]:
@@ -191,7 +189,7 @@ def tick():
         # need the -1 because we want to go from 0 all the way to 1, not just 0.9...
 
         for pos, dir in ob["target_directions"]:
-            turn_obj_index = find_index(vessels, pos)
+            turn_obj_index = find_index(vessels, pos, dead_vessels)
             turn_obj, _, last_dir = vessels[turn_obj_index]
 
             current_dir = lerp_angle(last_dir, dir, fraction_in_turn_phase)
@@ -208,7 +206,7 @@ def tick():
         fraction_in_move_phase = (time_in_phase - turn_phase_length) / (move_phase_length - 1)
 
         for pos, dest in ob["movements"]:
-            move_obj_index = find_index(vessels, pos)
+            move_obj_index = find_index(vessels, pos, dead_vessels)
             move_obj, start, last_dir = vessels[move_obj_index]
 
             current_pos = lerp_pos(start, dest, fraction_in_move_phase)
@@ -257,20 +255,20 @@ def tick():
     time_in_dying_phase = time_in_phase - turn_phase_length - shoot_phase_length
     is_dying_phase = time_in_dying_phase >= 0
     if is_dying_phase:
-
-        old_fraction_in_dying_phase = max(0, (time_in_dying_phase - 1) / (dying_phase_length - 1))
         fraction_in_dying_phase = time_in_dying_phase / (dying_phase_length - 1)
 
         for pos in ob["deaths"]:
-            dying_ship_index = find_index(ob["ships"], pos)
+            dying_ship_index = find_index(ob["ships"], pos, ob["dead_ships"])
             dying_ship, _, _ = ob["ships"][dying_ship_index]
             # I have no idea what's going on
             #old_y_rotation = lerp(0, 180, old_fraction_in_dying_phase)
             current_y_rotation = lerp(0, 180, fraction_in_dying_phase)
-            current_z_offset = lerp(0, -0.02, fraction_in_dying_phase)
             #rotation_todo = mathutils.Euler([0, math.radians(current_y_rotation), 0])
-            #dying_ship.orientation = rotation_todo
+            #dying_ship.localOrientation = rotation_todo.to_matrix()
             set_object_y_rotation(dying_ship, current_y_rotation)
+            dying_ship.position[2] = lerp(0, -0.02, fraction_in_dying_phase)
+            if time_in_dying_phase == dying_phase_length-1:
+                ob["dead_ships"].append(dying_ship_index)
 
 
     if time_in_phase == turn_phase_length-1:

@@ -5,14 +5,13 @@ controller = bge.logic.getCurrentController()
 move = controller.actuators["move"]
 cam = controller.owner
 
-turn_phase_length = 4
-move_phase_length = 8
+turn_phase_length = cam["turn_phase_length"]
+move_phase_length = cam["move_phase_length"]
 
-export_path = "export"
-export_prefix = "export"
-export = False
+export_path = cam["export_path"]
+export_prefix = cam["export_prefix"]
+export = cam["export"]
 
-# ^^^^^^^^^^^^ adjust speed settings here ^^^^^^^^^^^^^^^^^
 total_phase_length = turn_phase_length + move_phase_length
 
 # get sensor data

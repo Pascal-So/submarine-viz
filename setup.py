@@ -11,7 +11,17 @@ import loadMap
 path_to_logfile = "logs/game.txt"
 path_to_directorfile = "logs/director.txt"
 
-# ^^^^^^^^^^   set path to log file here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+export_path = "export"
+export_prefix = "export"
+export = False
+
+turn_phase_length = 4
+move_phase_length = 8
+
+jump_to_frame = 0
+
+# ^^^^^^^^^^   set path to log file here    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^   adjust speed settings here   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 cont = bge.logic.getCurrentController()
@@ -130,6 +140,7 @@ for line in submarine_lines:
 ob["log_lines"] = log_lines
 ob["ships"] = ships
 ob["submarines"] = submarines
+ob["dead_ships"] = []
 
 directors = []
 if os.path.isfile(path_to_directorfile):
@@ -151,3 +162,14 @@ ob["ship_turn"] = True
 ob["frame_nr"] = 0
 
 ob["game_running"] = True
+
+cam["export_path"] = export_path
+cam["export_prefix"] = export_prefix
+cam["export"] = export
+cam["turn_phase_length"] = turn_phase_length
+cam["move_phase_length"] = move_phase_length
+ob["turn_phase_length"] = turn_phase_length
+ob["move_phase_length"] = move_phase_length
+ob["jump_to_frame"] = jump_to_frame
+
+bge.logic.setMaxLogicFrame(1)
