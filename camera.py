@@ -20,6 +20,8 @@ press_a = controller.sensors["a"]
 press_s = controller.sensors["s"]
 press_d = controller.sensors["d"]
 press_q = controller.sensors["q"]
+press_e = controller.sensors["e"]
+press_r = controller.sensors["r"]
 wheel_up = controller.sensors["wheel up"]
 wheel_down = controller.sensors["wheel down"]
 space = controller.sensors["space"]
@@ -34,6 +36,8 @@ def sign(x):
     else:
         return 0
 
+if press_r.positive:
+    cam.orientation = mathutils.Euler([0, 0, 0])
 
 ############### x, y motion ################
 
@@ -123,10 +127,13 @@ move.dLoc = [v_x, v_y, v_z]
 controller.activate(move)
 
 if space.positive:
+    curval[0] = round(curval[0])
     print(" ".join(map(str, curval)))
 
 if press_q.positive:
     cam["directors_paused"] = not cam["directors_paused"]
+if press_e.positive:
+    cam["game_paused"] = not cam["game_paused"]
 
 if export:
     filename = os.path.join(export_path, export_prefix + str(cam["frame_nr_exact"]).zfill(8) + ".png")

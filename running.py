@@ -286,9 +286,10 @@ def tick():
 
 if "game_running" in ob and ob["game_running"]:
     # we don't need no .. optimization... dum dudum dum dum ..
-    tick()
-    ob["frame_nr"]+=1
-    cam["frame_nr_exact"] = ob["frame_nr"]
+    if not cam["game_paused"]:
+        tick()
+        ob["frame_nr"]+=1
+        cam["frame_nr_exact"] = ob["frame_nr"]
 
     while ob["frame_nr"] < jump_to_frame:
         tick()

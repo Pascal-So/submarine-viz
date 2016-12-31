@@ -19,6 +19,7 @@ turn_phase_length = 4
 move_phase_length = 8
 
 jump_to_frame = 0
+fast_create = True
 
 # ^^^^^^^^^^   set path to log file here    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # ^^^^^^^^^^   adjust speed settings here   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -29,6 +30,7 @@ actuator_quit = cont.actuators["quit"]
 ob = cont.owner
 scene = bge.logic.getCurrentScene()
 cam = scene.objects['Camera']
+ob["fast_create"] = fast_create
 
 def exit():
     cont.activate(actuator_quit)
@@ -162,6 +164,7 @@ ob["ship_turn"] = True
 ob["frame_nr"] = 0
 
 ob["game_running"] = True
+cam["game_paused"] = False
 
 cam["export_path"] = export_path
 cam["export_prefix"] = export_prefix
