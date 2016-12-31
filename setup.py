@@ -141,6 +141,7 @@ if os.path.isfile(path_to_directorfile):
 cam["frame_nr"] = 0
 cam["frame_nr_exact"] = 0
 cam["directors"] = sorted(directors)
+cam["directors_paused"] = False
 
 
 # phases: turing, moving

@@ -1,5 +1,6 @@
 import bge
 import math
+import mathutils
 
 c = bge.logic.getCurrentController()
 ob = c.owner
@@ -10,6 +11,7 @@ cam = scene.objects['Camera']
 turn_phase_length = 4
 move_phase_length = 8
 
+jump_to_frame = 0
 
 # ^^^^^^^^^^^^ adjust speed settings here ^^^^^^^^^^^^^^^^^
 
@@ -256,14 +258,18 @@ def tick():
     is_dying_phase = time_in_dying_phase >= 0
     if is_dying_phase:
 
+        old_fraction_in_dying_phase = max(0, (time_in_dying_phase - 1) / (dying_phase_length - 1))
         fraction_in_dying_phase = time_in_dying_phase / (dying_phase_length - 1)
 
         for pos in ob["deaths"]:
             dying_ship_index = find_index(ob["ships"], pos)
             dying_ship, _, _ = ob["ships"][dying_ship_index]
-
+            # I have no idea what's going on
+            #old_y_rotation = lerp(0, 180, old_fraction_in_dying_phase)
             current_y_rotation = lerp(0, 180, fraction_in_dying_phase)
-
+            current_z_offset = lerp(0, -0.02, fraction_in_dying_phase)
+            #rotation_todo = mathutils.Euler([0, math.radians(current_y_rotation), 0])
+            #dying_ship.orientation = rotation_todo
             set_object_y_rotation(dying_ship, current_y_rotation)
 
 
@@ -285,6 +291,11 @@ if "game_running" in ob and ob["game_running"]:
     tick()
     ob["frame_nr"]+=1
     cam["frame_nr_exact"] = ob["frame_nr"]
+
+    while ob["frame_nr"] < jump_to_frame:
+        tick()
+        ob["frame_nr"]+=1
+        cam["frame_nr_exact"] = ob["frame_nr"]
 
     if ob["log_lines"][ob["pointer"]].split()[0] == "GAMEEND":
         ob["game_running"] = False

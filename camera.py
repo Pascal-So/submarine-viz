@@ -1,5 +1,6 @@
 import bge
 import os
+import mathutils
 controller = bge.logic.getCurrentController()
 move = controller.actuators["move"]
 cam = controller.owner
@@ -19,6 +20,7 @@ press_w = controller.sensors["w"]
 press_a = controller.sensors["a"]
 press_s = controller.sensors["s"]
 press_d = controller.sensors["d"]
+press_q = controller.sensors["q"]
 wheel_up = controller.sensors["wheel up"]
 wheel_down = controller.sensors["wheel down"]
 space = controller.sensors["space"]
@@ -78,7 +80,7 @@ if(abs(v_y) > v_max):
 ############# z motion ###############
 
 v_speed = 0.07
-camera_min_height = 4
+camera_min_height = 0
 
 
 v_z = v_speed * cam_height * (wheel_down.positive - wheel_up.positive)
@@ -91,19 +93,6 @@ def lerp(val1, val2, frac):
     """ linear interpolation """
     return val1 * (1-frac) + val2 * frac
 
-def lerp_angle(val1, val2, frac):
-    """ like lerp, but wrap over 360 if it
-    is shorter
-    """
-    if abs(val2 - val1) <= 180:
-        return lerp(val1, val2, frac)
-    else:
-        if val1 < val2:
-            val1 += 360
-        else:
-            val2 += 360
-        return wrap(0,360, lerp(val1, val2, frac))
-
 frame_nr = cam["frame_nr"]
 neutval = [0] * 7
 oldval = neutval
@@ -113,25 +102,32 @@ curval = [cam["frame_nr_exact"] / total_phase_length, cam.position.x, cam.positi
 shouldval = neutval
 vr_x = vr_y = vr_z = 0
 for d in cam["directors"]:
-    if d[0] > frame_nr:
+    if d[0] > curval[0]:
         newval = d
         break
     else:
         oldval = d
-if oldval != newval and oldval != neutval and newval != neutval:
-    prog = curval[0] / (newval[0] - oldval[0])
+if oldval != newval and oldval != neutval and newval != neutval and not cam["directors_paused"]:
+    prog = (curval[0] - oldval[0]) / (newval[0] - oldval[0])
     for i in range(1, 4):
         shouldval[i] = lerp(oldval[i], newval[i], prog)
-    for i in range(4, 7):
-        shouldval[i] = lerp_angle(oldval[i], newval[i], prog)
+    new_rot = mathutils.Euler(newval[4:7]).to_quaternion()
+    old_rot = mathutils.Euler(oldval[4:7]).to_quaternion()
+    cur_rot = mathutils.Euler(curval[4:7]).to_quaternion()
+    should_rot = old_rot.slerp(new_rot, prog)
+    shouldval[4:7] = should_rot.to_euler()
     _, v_x, v_y, v_z, vr_x, vr_y, vr_z = (s - c for s, c in zip(shouldval, curval))
+    cam.orientation = should_rot.to_matrix()
 
 move.dLoc = [v_x, v_y, v_z]
-move.dRot = [vr_x, vr_y, vr_z]
+#move.dRot = [vr_x, vr_y, vr_z]
 controller.activate(move)
 
 if space.positive:
     print(" ".join(map(str, curval)))
+
+if press_q.positive:
+    cam["directors_paused"] = not cam["directors_paused"]
 
 if export:
     filename = os.path.join(export_path, export_prefix + str(cam["frame_nr_exact"]).zfill(8) + ".png")
