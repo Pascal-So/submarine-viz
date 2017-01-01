@@ -19,7 +19,7 @@ turn_phase_length = 4
 move_phase_length = 8
 
 jump_to_frame = 0
-fast_create = True
+fast_create = 0
 
 # ^^^^^^^^^^   set path to log file here    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # ^^^^^^^^^^   adjust speed settings here   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
