@@ -8,23 +8,36 @@ import loadMap
 # if the game can't be started, check if the path_to_logfile is correct and if the
 # logfile is valid. The blender game will quit on incorrect input.
 
-path_to_logfile = "logs/game5.txt"
+path_to_logfile = "logs/game.txt"
+path_to_directorfile = "logs/director.txt"
 
-# ^^^^^^^^^^   set path to log file here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+export_path = "export"
+export_prefix = "export"
+export = False
+
+turn_phase_length = 4
+move_phase_length = 8
+
+jump_to_frame = 0
+fast_create = 0
+
+# ^^^^^^^^^^   set path to log file here    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^   adjust speed settings here   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 cont = bge.logic.getCurrentController()
 actuator_quit = cont.actuators["quit"]
 ob = cont.owner
 scene = bge.logic.getCurrentScene()
-
+cam = scene.objects['Camera']
+ob["fast_create"] = fast_create
 
 def exit():
     cont.activate(actuator_quit)
 
 if not os.path.isfile(path_to_logfile):
     exit()
-    
+
 log_lines = []
 
 with open(path_to_logfile, "r") as f:
@@ -32,8 +45,8 @@ with open(path_to_logfile, "r") as f:
 
 if len(log_lines) == 0:
     exit()
-    
-    
+
+
 def read_header_line(line):
     """ Sets some global variables with the game information
     side-effects: writes variables in owner dict
@@ -51,16 +64,16 @@ def read_header_line(line):
         return True
     else:
         return False
-    
-    
+
+
 if not read_header_line(log_lines[2]):
     print ("incorrect log file format, expected gameinfo on line 3")
     exit()
-    
+
 
 def place_vessel(type, x, y):
-    """ returns the vessel object once it's been instanciated 
-    
+    """ returns the vessel object once it's been instanciated
+
     The objects have to be named "ship" and "submarine"
     """
     vessel = scene.addObject(type, "gameLogic")
@@ -122,14 +135,26 @@ for line in submarine_lines:
 
 
 # submarines and ships have been added to their start
-# positions, start main loop now. 
+# positions, start main loop now.
 
 # pass the relevant information to the object so it can
 # be used by "running.py"
 ob["log_lines"] = log_lines
 ob["ships"] = ships
 ob["submarines"] = submarines
+ob["dead_ships"] = []
 
+directors = []
+if os.path.isfile(path_to_directorfile):
+    with open(path_to_directorfile, "r") as f:
+        for line in f:
+            if line.strip() == "---":
+                break
+            directors.append(list(map(float, line.split())))
+cam["frame_nr"] = 0
+cam["frame_nr_exact"] = 0
+cam["directors"] = sorted(directors)
+cam["directors_paused"] = False
 
 
 # phases: turing, moving
@@ -139,3 +164,15 @@ ob["ship_turn"] = True
 ob["frame_nr"] = 0
 
 ob["game_running"] = True
+cam["game_paused"] = False
+
+cam["export_path"] = export_path
+cam["export_prefix"] = export_prefix
+cam["export"] = export
+cam["turn_phase_length"] = turn_phase_length
+cam["move_phase_length"] = move_phase_length
+ob["turn_phase_length"] = turn_phase_length
+ob["move_phase_length"] = move_phase_length
+ob["jump_to_frame"] = jump_to_frame
+
+bge.logic.setMaxLogicFrame(1)
